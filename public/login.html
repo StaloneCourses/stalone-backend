@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login - Stalone</title>
+  <style>
+    body { background:#000; color:#fff; font-family:Arial,sans-serif;
+      display:flex; justify-content:center; align-items:center; height:100vh; }
+    .container { background:#111; padding:30px; border-radius:12px;
+      box-shadow:0 0 10px #00f5ff; width:350px; position:relative; }
+    .container h2 { text-align:center; margin-bottom:20px; }
+    input { width:100%; padding:10px; margin:8px 0; border-radius:6px; border:none;
+      background:#222; color:#fff; }
+    input:focus { box-shadow:0 0 5px #00f5ff; }
+    button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:6px;
+      background:#00f5ff; color:#000; font-weight:bold; cursor:pointer; }
+    button:hover { box-shadow:0 0 10px #00f5ff; }
+    .back { position:absolute; top:10px; left:10px; color:#00f5ff; cursor:pointer; }
+    .links { margin-top:15px; text-align:center; }
+    .links a { color:#00f5ff; text-decoration:none; display:block; margin:5px 0; }
+    #loginMsg {color:limegreen; margin-top:10px; display:none;}
+    #loginError {color:#ff4c4c; margin-top:10px; display:none;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="back" onclick="history.back()">← Back</div>
+    <h2>Login</h2>
+    <form id="loginForm">
+      <input type="email" placeholder="Email" name="email" required />
+      <input type="password" placeholder="Password" name="password" required />
+      <button type="submit" id="loginBtn">Login</button>
+      <p id="loginMsg"></p>
+      <p id="loginError"></p>
+    </form>
+    <div class="links">
+      <a href="signup.html">Don’t have an account? Signup</a>
+      <a href="forgot-password.html">Forgot Password?</a>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("loginForm");
+    const loginBtn = document.getElementById("loginBtn");
+    const loginMsg = document.getElementById("loginMsg");
+    const loginError = document.getElementById("loginError");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      loginMsg.style.display = "none";
+      loginError.style.display = "none";
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Logging in...";
+
+      const data = { email: form.email.value, password: form.password.value };
+
+      try {
+        const res = await fetch("http://localhost:5000/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        const result = await res.json();
+
+        if (res.ok) {
+          loginMsg.textContent = "Login successful! Redirecting...";
+          loginMsg.style.display = "block";
+          form.reset();
+          setTimeout(() => (window.location.href = "index.html"), 1500);
+        } else {
+          loginError.textContent = result.message || "Login failed";
+          loginError.style.display = "block";
+        }
+      } catch (err) {
+        loginError.textContent = "Server error. Please try again later.";
+        loginError.style.display = "block";
+        console.error(err);
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Login";
+      }
+    });
+  </script>
+</body>
+</html>
